@@ -1,33 +1,40 @@
-use aws_lambda_events::{event::ses::SimpleEmailEvent, ses::SimpleEmailRecord};
+use aws_lambda_events::event::ses::SimpleEmailEvent;
 use lambda_runtime::{run, service_fn, tracing, Error, LambdaEvent};
 use serde::Serialize;
 
 #[derive(Serialize)]
 struct Response {
-    msg: String,
-    success: bool,
+    owner: String,
+    repo: String,
+    issue_number: u64,
 }
 
 async fn function_handler(event: LambdaEvent<SimpleEmailEvent>) -> Result<Response, Error> {
     let records = event.payload.records;
-    let message;
 
-    if let Some(record) = records.first() {
-        if let Some(message_id) = &record.ses.mail.message_id {
-            let resp = Response {
-                msg: format!("The message id is: {}", message_id),
-                success: true,
-            };
-            return Ok(resp);
-        } else {
-            message = "No message id found".to_string();
-        }
-    } else {
-        message = "No mail record found".to_string();
+    let message_id = records
+        .first()
+        .ok_or_else(|| Error::from("No email record found"))?
+        .ses
+        .mail
+        .message_id
+        .as_ref()
+        .ok_or_else(|| Error::from("No message id found"))?;
+
+    let trimmed = message_id.trim_matches(&['<', '>']);
+    let parts: Vec<&str> = trimmed.split('/').collect();
+    if parts.len() < 4 {
+        return Err(Error::from(format!("Malformed messaged id: {message_id}")));
     }
+
+    let owner = parts[0].to_string();
+    let repo = parts[1].to_string();
+    let issue_number = parts[3].parse()?;
+
     Ok(Response {
-        msg: message,
-        success: false,
+        owner,
+        repo,
+        issue_number,
     })
 }
 
