@@ -25,6 +25,7 @@ async fn function_handler(event: LambdaEvent<SimpleEmailEvent>) -> Result<Respon
         })?
         .ses
         .mail
+        .common_headers
         .message_id
         .as_ref()
         .ok_or_else(|| {
@@ -32,7 +33,13 @@ async fn function_handler(event: LambdaEvent<SimpleEmailEvent>) -> Result<Respon
             Error::from("No message id found")
         })?;
 
-    let trimmed = message_id.trim_matches(&['<', '>']);
+    let trimmed = message_id
+        .trim_matches(&['<', '>'])
+        .strip_suffix("@github.com")
+        .ok_or_else(|| {
+            error!("Malformed messaged id: {message_id}");
+            Error::from(format!("Malformed messaged id: {message_id}"))
+        })?;
     let parts: Vec<&str> = trimmed.split('/').collect();
     if parts.len() < 4 {
         error!("Malformed messaged id: {message_id}");

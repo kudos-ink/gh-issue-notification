@@ -7,7 +7,7 @@
         "mail": {
           "timestamp": "2019-08-05T21:30:02.028Z",
           "source": "prvs=144d0cba7=sender@example.com",
-          "messageId": "paritytech/polkadot-sdk/issues/1962/1824446868@github.com",
+          "messageId": "<paritytech/polkadot-sdk/issues/1962/1824446868@github.com>",
           "destination": ["recipient@example.com"],
           "headersTruncated": false,
           "headers": [
@@ -133,7 +133,7 @@
             "from": ["\"Doe, John\" <sender@example.com>"],
             "date": "Mon, 5 Aug 2019 21:29:57 +0000",
             "to": ["\"recipient@example.com\" <recipient@example.com>"],
-            "messageId": "<F8098FDD-49A3-442D-9935-F6112B195BDA@example.com>",
+            "messageId": "<TalismanSociety/talisman/issues/1426@github.com>",
             "subject": "This is a test"
           }
         },
